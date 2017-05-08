@@ -1,0 +1,11 @@
+#info {
+	position: absolute;
+	top: 15px;
+	width: 100%;
+  /*text-align: center;*/
+  margin-left: 15px;
+	z-index: 100;
+	display:block;
+  color: black;
+  font-family: 'Georgia'
+}
