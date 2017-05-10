@@ -1,19 +1,6 @@
 <html>
 	<head>
 		<title>three.js test app</title>
-		<style>
-			body { margin: 0; }
-			 canvas {
-				width: 100vw;
-				height: 100vh;
-				display: block;
-				position: fixed;
-				background-color: white;
-				top: 0;
-				left: 0;
-				z-index: -9999;
-			}
-		</style>
     <link rel="stylesheet" type="text/css" href="main.css">
 	</head>
 	<body>
@@ -21,24 +8,25 @@
 		<script src="js/three.js"></script>
 		<script>
 			var scene = new THREE.Scene();
-			var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 ); // field of view, aspect ratio, near and far clipping panes
+			var camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 2000 ); // field of view, aspect ratio, near and far clipping panes
 
 			var renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
 			document.body.appendChild( renderer.domElement );
 
-			var geometry = new THREE.BoxGeometry( 2, 2, 1 ); // x, y, z
+			var geometry = new THREE.BoxGeometry( 100, 100, 50 ); // x, y, z
 			var material = new THREE.MeshLambertMaterial ( { color: 'pink' } );
 			var cube = new THREE.Mesh( geometry, material );
-      var cube2 = new THREE.Mesh( geometry, material )
-      cube2.position.y = 5
 			scene.add( cube );
 
-			camera.position.z = 7; // move camera away from origin so they're not on top of each other
+			camera.position.x = 100;
+			camera.position.z = 500;
+			camera.position.y = 100;
+			// camera.position.z = 7; // move camera away from origin so they're not on top of each other
 
 			// create a point light
 			const pointLight =
-				new THREE.PointLight('white', 1); // color, intensity, distance, decay
+				new THREE.PointLight('white', 1.5); // color, intensity, distance, decay
 
 			// set its position
 			pointLight.position.x = 10;
@@ -48,16 +36,73 @@
 			// add to the scene
 			scene.add(pointLight);
 
-			var render = function () {
-				requestAnimationFrame( render );
+			// scene.fog = new THREE.Fog(0xf7d9aa, 200, 250); // color, near, far (max distance at which fog affects things)
 
-				// cube.rotation.x += 0.025;
+			// First let's define a Sea object :
+			Sea = function(){
+
+				// create the geometry (shape) of the cylinder;
+				// the parameters are:
+				// radius top, radius bottom, height, number of segments on the radius, number of segments vertically
+				var geom = new THREE.CylinderGeometry(200,200,200,400,10); // CylinderGeometry(radiusTop, radiusBottom, height, radiusSegments, heightSegments, openEnded, thetaStart, thetaLength)
+
+				// rotate the geometry on the x axis
+				geom.applyMatrix(new THREE.Matrix4().makeRotationX(-Math.PI/2));
+
+				// create the material
+				var mat = new THREE.MeshPhongMaterial({
+					color:Colors.blue,
+					transparent:true,
+					opacity:.6,
+					shading:THREE.FlatShading,
+				});
+
+				// To create an object in Three.js, we have to create a mesh
+				// which is a combination of a geometry and some material
+				this.mesh = new THREE.Mesh(geom, mat);
+
+				// Allow the sea to receive shadows
+				this.mesh.receiveShadow = true;
+			}
+
+			// Instantiate the sea and add it to the scene:
+
+			var Colors = {
+				red:0xf25346,
+				white:0xd8d0d1,
+				brown:0x59332e,
+				pink:0xF5986E,
+				brownDark:0x23190f,
+				blue:0x68c3c0,
+			};
+			var sea;
+
+			function createSea(){
+				sea = new Sea();
+
+				// push it a little bit at the bottom of the scene
+				sea.mesh.position.y = -200;
+
+				// add the mesh of the sea to the scene
+				scene.add(sea.mesh);
+			}
+
+			createSea()
+
+			var render = function () {
+				camera.lookAt( scene.position );
+				var timer = new Date().getTime() * 0.0005;
+				camera.position.x = Math.floor(Math.cos( timer ) * 600);
+  			camera.position.z = Math.floor(Math.sin( timer ) * 600);
+				requestAnimationFrame( render );
+				cube.rotation.x += 0.025;
 				cube.rotation.y += 0.025;
 				renderer.setClearColor( 'lightgrey', 1.0 );
 				renderer.render(scene, camera);
 			};
 
 			render();
+
 		</script>
 	</body>
 </html>
